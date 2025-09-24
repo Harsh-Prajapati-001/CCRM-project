@@ -1,0 +1,73 @@
+// com.ccrm.service.CCRMService.java
+package com.ccrm.service;
+
+import com.ccrm.model.Course;
+import com.ccrm.model.Student;
+import com.ccrm.io.FileHandler;
+import com.ccrm.util.CourseBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public final class CCRMService {
+    private static final CCRMService INSTANCE = new CCRMService();
+    private final List<Student> students = new ArrayList<>();
+    private final List<Course> courses = new ArrayList<>();
+    private final FileHandler fileHandler = new FileHandler();
+
+    // Private constructor to prevent instantiation from outside
+    private CCRMService() {}
+
+    public static CCRMService getInstance() {
+        return INSTANCE;
+    }
+
+    // Student Management
+    public void addStudent(String studentId, String name, String email) {
+        Student newStudent = new Student(studentId, name, email);
+        students.add(newStudent);
+    }
+
+    public Optional<Student> findStudentById(String id) {
+        return students.stream()
+                .filter(s -> s.getStudentId().equals(id))
+                .findFirst();
+    }
+
+    // Course Management
+    public void createCourse(CourseBuilder builder) {
+        courses.add(builder.build());
+    }
+
+    public Optional<Course> findCourseByCode(String code) {
+        return courses.stream()
+                .filter(c -> c.getCourseCode().equals(code))
+                .findFirst();
+    }
+
+    public List<Course> searchCourses(String keyword) {
+        return courses.stream()
+                .filter(c -> c.getTitle().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    // File Utilities
+    public void exportStudentsToCsv(String filePath) throws Exception {
+        fileHandler.exportStudentsToCsv(students, filePath);
+    }
+
+    public void importStudentsFromCsv(String filePath) throws Exception {
+        List<Student> importedStudents = fileHandler.importStudentsFromCsv(filePath);
+        this.students.addAll(importedStudents);
+    }
+
+    // Recursion example (though simple, it shows the concept)
+    public int countStudentsInList(List<Student> studentList) {
+        if (studentList.isEmpty()) {
+            return 0;
+        } else {
+            return 1 + countStudentsInList(studentList.subList(1, studentList.size()));
+        }
+    }
+}
